@@ -1,4 +1,4 @@
-const express = require("express");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/userModels");
 
@@ -17,10 +17,25 @@ const createuser = async (req, res) => {
       email,
       password: hashpassword,
     });
+    const payload = {
+      id: user._id,
+      email: user.email,
+    };
+    const accesstoken = jwt.sign(payload, process.env.SECRET_KEY, {
+      expiresIn: "1d",
+    });
+    const refreshtoken = jwt.sign(payload, process.env.SECRET_KEY, {
+      expiresIn: "7d",
+    });
+
+    user.refreshtoken = refreshtoken;
+    await user.save();
     res.status(201).json({
       message: "Signup successfully",
       code: 201,
       data: user,
+      accesstoken: accesstoken,
+      refreshtoken: refreshtoken,
     });
   } catch (error) {
     res.status(500).json({
@@ -45,19 +60,29 @@ const login = async (req, res) => {
     const compare = await bcrypt.compare(password, user.password);
     if (!compare)
       return res.status(401).json({
-        message: "password not found",
+        message: "invalid password",
         code: 401,
         password: compare,
       });
+
+    const payload = {
+      id: user._id,
+      email: user.email,
+    };
+    const accesstoken = jwt.sign(payload, process.env.SECRET_KEY,{expiresIn:"1d"});
+    const refreshtoken = jwt.sign(payload, process.env.SECRET_KEY,{expiresIn:"7d"});
+
     res.status(200).json({
       message: "login succesfully",
       code: 200,
+      accesstoken: accesstoken,
+      refreshtoken: refreshtoken,
     });
   } catch (error) {
     res.status(500).json({
       message: "internal server error",
       code: 500,
-      error: error.message,
+      error: error.message
     });
   }
 };

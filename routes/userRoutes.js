@@ -5,8 +5,8 @@ routes.use(express.json())
 
 routes.post("/user",createuser)
 routes.post("/login",login)
-routes.post("/:id",editpassword)
+routes.post("/user/:id",editpassword)
 routes.get("/user",getuser)
-routes.delete("/:id",deleteuser)
+routes.delete("/user/:id",deleteuser)
 
 module.exports = routes
