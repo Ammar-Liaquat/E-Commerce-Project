@@ -148,13 +148,13 @@ const refresht = async (req, res) => {
         message: "unauthorized",
         code: 401,
       });
-    jwt.verify(refreshtoken, process.env.SECRET_KEY);
+    const verifytoken = jwt.verify(refreshtoken, process.env.SECRET_KEY);
 
     const payload = {
-      id: refreshtoken.id,
-      email: refreshtoken.email,
+      id: verifytoken.id,
+      email: verifytoken.email,
     };
-   const newaccesstoken = jwt.sign(payload, process.env.SECRET_KEY);
+   const newaccesstoken = jwt.sign(payload, process.env.SECRET_KEY,{expiresIn:"7d"});
     res.status(200).json({
       message:"token refresh succesfully",
       code:200,
