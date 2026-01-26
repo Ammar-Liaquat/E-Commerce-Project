@@ -20,4 +20,4 @@ const middleware = async(req,res,next)=>{
     })
 }
 }
-module.exports = {middleware}
+module.exports = middleware

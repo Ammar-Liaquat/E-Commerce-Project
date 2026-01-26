@@ -49,7 +49,7 @@ const createuser = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    let user = await User.findOne({ email });
 
     if (!user)
       return res.status(401).json({
@@ -69,12 +69,16 @@ const login = async (req, res) => {
       id: user._id,
       email: user.email,
     };
-    const accesstoken = jwt.sign(payload, process.env.SECRET_KEY,{expiresIn:"1d"});
-    const refreshtoken = jwt.sign(payload, process.env.SECRET_KEY,{expiresIn:"7d"});
-
+    const accesstoken = jwt.sign(payload, process.env.SECRET_KEY, {
+      expiresIn: "1d",
+    });
+    const refreshtoken = jwt.sign(payload, process.env.SECRET_KEY, {
+      expiresIn: "7d",
+    });
     res.status(200).json({
       message: "login succesfully",
       code: 200,
+      data: user,
       accesstoken: accesstoken,
       refreshtoken: refreshtoken,
     });
@@ -82,7 +86,7 @@ const login = async (req, res) => {
     res.status(500).json({
       message: "internal server error",
       code: 500,
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -136,6 +140,35 @@ const getuser = async (req, res) => {
   }
 };
 
+const refresht = async (req, res) => {
+  try {
+    const { refreshtoken } = req.body;
+    if (!refreshtoken)
+      return res.status(401).json({
+        message: "unauthorized",
+        code: 401,
+      });
+    jwt.verify(refreshtoken, process.env.SECRET_KEY);
+
+    const payload = {
+      id: refreshtoken.id,
+      email: refreshtoken.email,
+    };
+   const newaccesstoken = jwt.sign(payload, process.env.SECRET_KEY);
+    res.status(200).json({
+      message:"token refresh succesfully",
+      code:200,
+      data:newaccesstoken
+    })
+  } catch (error) {
+    res.status(500).json({
+      message:"internal server error",
+      code:500,
+      error:error.message
+    }
+  )}
+};
+
 const deleteuser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
@@ -166,4 +199,5 @@ module.exports = {
   editpassword,
   getuser,
   deleteuser,
+  refresht
 };
