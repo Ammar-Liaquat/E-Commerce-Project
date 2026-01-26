@@ -14,8 +14,8 @@ routes.use(express.json());
 routes.post("/user", createuser);
 routes.post("/login", login);
 routes.post("/user/:id", editpassword);
-routes.get("/user", middleware, getuser);
+routes.get("/user",getuser);
 routes.delete("/user/:id", deleteuser);
-routes.post("/refresh", refresht);
+routes.post("/refresh",middleware, refresht);
 
 module.exports = routes;
