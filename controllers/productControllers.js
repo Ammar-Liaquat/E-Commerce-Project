@@ -80,9 +80,13 @@ const editproduct = async (req, res) => {
 };
 const deleteproduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findByIdAndDelete(
+      req.params.id,
+      { $set: req.body },
+      { new: true },
+    );
     res.status(200).json({
-      message: "product delete sucessfully",
+      message: "product update sucessfully",
       code: 200,
       data: product,
     });
@@ -100,5 +104,5 @@ module.exports = {
   getproduct,
   getallproduct,
   editproduct,
-  deleteproduct,
+  deleteproduct
 };
