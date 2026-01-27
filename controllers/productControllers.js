@@ -27,16 +27,67 @@ const createproduct = async (req, res) => {
 const getproduct = async (req, res) => {
   try {
     const userId = req.user.id;
-    const product = await Product.find({userid: userId});
+    const product = await Product.find({ userid: userId });
     res.status(200).json({
-      message: " product fetched succesfully",
+      message: " user product fetched succesfully",
       code: 200,
-      data:product,
-      
+      data: product,
     });
-    
   } catch (error) {
-      res.status(500).json({
+    res.status(500).json({
+      message: "internal server error",
+      code: 500,
+      error: error.message,
+    });
+  }
+};
+
+const getallproduct = async (req, res) => {
+  try {
+    const product = await Product.find();
+    res.status(200).json({
+      message: "all product fetched succesfully",
+      code: 200,
+      data: product,
+    });
+  } catch (error) {
+    res.status(200).json({
+      message: "Internal server error",
+      code: 200,
+      error: error.message,
+    });
+  }
+};
+const editproduct = async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true },
+    );
+    res.status(200).json({
+      message: "product update sucessfully",
+      code: 200,
+      data: product,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "internal server error",
+      code: 500,
+      error: error.message,
+    });
+  }
+};
+const deleteproduct = async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    res.status(200).json({
+      message: "product delete sucessfully",
+      code: 200,
+      data: product,
+    });
+  } catch (error) {
+    res.status(500).json({
       message: "internal server error",
       code: 500,
       error: error.message,
@@ -46,5 +97,8 @@ const getproduct = async (req, res) => {
 
 module.exports = {
   createproduct,
-  getproduct
+  getproduct,
+  getallproduct,
+  editproduct,
+  deleteproduct,
 };

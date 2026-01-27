@@ -5,6 +5,6 @@ const productRoutes = require("./userProductRoutes")
 const usersRoutes = require("./userRoutes")
 
 routes.use("/", usersRoutes)
-routes.use("/product/", productRoutes)
+routes.use("/", productRoutes)
 
 module.exports = routes
