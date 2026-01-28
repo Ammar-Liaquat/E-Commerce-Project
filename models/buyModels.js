@@ -2,18 +2,18 @@ const mongoose = require("mongoose");
 
 const buyProduct = mongoose.Schema(
   {
-    userid: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
+    idproduct: { type: mongoose.Schema.Types.ObjectId, ref: "product" },
 
-    email: {
-      type: String,
+    name:{
+      type:String,
+      required:true
+    },
+    quantity: {
+      type: Number,
       required: true,
     },
-    name: {
-      type: String,
-      required: true,
-    },
-    address: {
-      type: String,
+    totalprice: {
+      type: Number,
       required: true,
     },
   },
