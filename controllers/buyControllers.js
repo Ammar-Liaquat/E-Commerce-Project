@@ -11,7 +11,6 @@ const buyproduct = async (req, res) => {
     message:"Invalid Id",
     code:401
    })
-   await Product.find({name}) 
    if(product.name !== name) return res.status(401).json({
     message:"product name is wrong",
     code:401
