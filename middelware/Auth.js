@@ -15,8 +15,9 @@ const middleware = async (req, res, next) => {
     next();
   } catch (error) {
     res.status(500).json({
-      message: "internal server error",
+      message: "Invalid Or expired token",
       code: 500,
+      error:error.message
     });
   }
 };

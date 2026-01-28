@@ -16,9 +16,9 @@ const buyproduct = async (req, res) => {
     message:"product name is wrong",
     code:401
    })
-   if(product.stock < quantity) return res.status(401).json({
+   if(product.stock < quantity) return res.status(409).json({
     message:"stock is empty",
-    code:401
+    code:409
    })
 
    const order = new buyProduct({
@@ -38,6 +38,7 @@ const buyproduct = async (req, res) => {
       data:order
     })
   } catch (error) {
+  
     res.status(500).json({
       message: "internal server error",
       code: 500,
@@ -46,6 +47,23 @@ const buyproduct = async (req, res) => {
   }
 };
 
+const boughtproduct = async (req,res)=>{
+
+  try {
+  const product = await buyProduct.find()
+  res.status(200).json({
+    message:200,
+    data:product
+ })
+  } catch (error) {
+    res.status(500).json({
+      message:"internal server error",
+      error:error.message
+    })
+  }
+}
+
 module.exports = {
-    buyproduct
+    buyproduct,
+    boughtproduct
 }
