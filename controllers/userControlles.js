@@ -1,42 +1,69 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/userModels");
+const nodemailer = require("nodemailer");
 
 const createuser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const existemail = await User.findOne({ email });
-    if (existemail)
+    let user = await User.findOne({ email });
+    if (user)
       return res.status(409).json({
         message: "email already exist",
         code: 409,
       });
     const salt = await bcrypt.genSalt(12);
     const hashpassword = await bcrypt.hash(password, salt);
-    const user = await User.create({
-      email,
-      password: hashpassword,
-    });
-    const payload = {
-      id: user._id,
-      email: user.email,
-    };
-    const accesstoken = jwt.sign(payload, process.env.SECRET_KEY, {
-      expiresIn: "1d",
-    });
-    const refreshtoken = jwt.sign(payload, process.env.SECRET_KEY, {
-      expiresIn: "7d",
-    });
 
-    user.refreshtoken = refreshtoken;
-    await user.save();
-    res.status(201).json({
-      message: "Signup successfully",
-      code: 201,
-      data: user,
-      accesstoken: accesstoken,
-      refreshtoken: refreshtoken,
-    });
+    const generateotp = Math.floor(100000 + Math.random() * 900000)
+    
+    user = await User.create({
+      email,
+      password:hashpassword,
+      otp:generateotp,
+      isverify:false,
+      otpexpiry: Date.now() + 5 * 6 * 1000,
+    })
+
+    const transport = nodemailer.createTransport({
+      service:"gmail",
+      auth: {
+        user:process.env.NodeMail_ID,
+        pass:process.env.NodeMailPassword
+      }
+    })
+
+    await transport.sendMail({
+      from:process.env.NodeMail_ID,
+      to:"ammarliaquat1234@gmail.com",
+      subject:"Welcome to Ammar Company",
+      text:` yor otp code ${generateotp} valid for 5 minutes`
+    })
+
+    res.status(200).json({
+      message:"otp is send to your email plz verify"
+    })
+
+    // const payload = {
+    //   id: user._id,
+    //   email: user.email,
+    // };
+    // const accesstoken = jwt.sign(payload, process.env.SECRET_KEY, {
+    //   expiresIn: "1d",
+    // });
+    // const refreshtoken = jwt.sign(payload, process.env.SECRET_KEY, {
+    //   expiresIn: "7d",
+    // });
+
+    // user.refreshtoken = refreshtoken;
+    // await user.save();
+    // res.status(201).json({
+    //   message: "Signup successfully",
+    //   code: 201,
+    //   data: user,
+    //   accesstoken: accesstoken,
+    //   refreshtoken: refreshtoken,
+    // });
   } catch (error) {
     res.status(500).json({
       message: "internal server error",
@@ -45,6 +72,42 @@ const createuser = async (req, res) => {
     });
   }
 };
+
+const verifyotp = async (req,res)=>{
+
+  try {
+    const {email, otp } = req.body
+
+    let user = await User.findOne({email})
+    if(!user) return res.status(401).json({
+      message:"user invalid",
+      code:401
+    })
+    if(user.isverify) return res.status(400).json({
+      message:"user verified"
+    })
+    if(user.otp != otp ) return res.status(401).json({
+      message:"invalid otp or expires otp",
+    }) 
+    user.isverify = true
+    user.otp = null
+    await user.save()
+
+    res.status(200).json({
+      message:"Signup successfully",
+      code:200
+    })
+
+  } catch (error) {
+     res.status(500).json({
+      message: "internal server error",
+      code: 500,
+      error: error.message,
+    });
+  }
+
+
+}
 
 const login = async (req, res) => {
   try {
@@ -154,19 +217,21 @@ const refresht = async (req, res) => {
       id: verifytoken.id,
       email: verifytoken.email,
     };
-   const newaccesstoken = jwt.sign(payload, process.env.SECRET_KEY,{expiresIn:"7d"});
+    const newaccesstoken = jwt.sign(payload, process.env.SECRET_KEY, {
+      expiresIn: "7d",
+    });
     res.status(200).json({
-      message:"token refresh succesfully",
-      code:200,
-      data:newaccesstoken
-    })
+      message: "token refresh succesfully",
+      code: 200,
+      data: newaccesstoken,
+    });
   } catch (error) {
     res.status(500).json({
-      message:"internal server error",
-      code:500,
-      error:error.message
-    }
-  )}
+      message: "internal server error",
+      code: 500,
+      error: error.message,
+    });
+  }
 };
 
 const deleteuser = async (req, res) => {
@@ -195,9 +260,10 @@ const deleteuser = async (req, res) => {
 
 module.exports = {
   createuser,
+  verifyotp,
   login,
   editpassword,
   getuser,
   deleteuser,
-  refresht
+  refresht,
 };
