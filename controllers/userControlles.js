@@ -117,8 +117,6 @@ const resendOtp = async (req,res)=>{
     message:"user not exist",
     code:401,
   })
-      if (user.isVerify)
-      return res.status(400).json({ message: "User already verified" });
   const generateotp = Math.floor(100000 + Math.random() * 900000);
 
    const transport = nodemailer.createTransport({
