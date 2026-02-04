@@ -22,7 +22,7 @@ const createuser = async (req, res) => {
       password: hashpassword,
       otp: generateotp,
       isVerify: false,
-      otpExpiry: Date.now() + 1 * 60 * 1000,
+      otpExpiry: Date.now() + 5 * 60 * 1000,
     });
     const transport = nodemailer.createTransport({
       service: "gmail",

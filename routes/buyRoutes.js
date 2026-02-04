@@ -5,7 +5,7 @@ const middelware = require("../middelware/Auth")
 const { buyproduct, boughtproduct } = require("../controllers/buyControllers")
 
 
-routes.post("/buy/:id",middelware, buyproduct)
+routes.post("/buy",middelware, buyproduct)
 routes.get("/myproduct",middelware, boughtproduct)
 
 module.exports = routes

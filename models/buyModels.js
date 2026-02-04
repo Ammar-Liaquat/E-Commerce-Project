@@ -14,7 +14,7 @@ const buyProduct = mongoose.Schema(
     },
     totalprice: {
       type: Number,
-      required: true,
+      
     },
   },
   { timestamps: true },
