@@ -7,21 +7,22 @@ const createuser = async (req, res) => {
   try {
     const { email, password } = req.body;
     let user = await User.findOne({ email });
-    if (user)
+    if (user) {
+      if (req.file) fs.unlinkSync(req.file.path);
       return res.status(400).json({
         message: "email already exist",
         code: 400,
       });
+    }
     if (!email) {
       if (req.file) fs.unlinkSync(req.file.path); // image delete karo
       return res.status(400).json({ error: "Email required" });
     }
-    if(!password) {
-      fs.unlinkSync(req.file.path);
-    return res.status(400).json({message:"password required"});
-  }
-  if(!req.file) return res.status(400).json({message:"image required"})
-
+    if (!password) {
+      if (req.file) fs.unlinkSync(req.file.path);
+      return res.status(400).json({ message: "password required" });
+    }
+    if (!req.file) return res.status(400).json({ message: "image required" });
     const salt = await bcrypt.genSalt(12);
     const hashpassword = await bcrypt.hash(password, salt);
 
@@ -37,6 +38,9 @@ const createuser = async (req, res) => {
     });
     const transport = nodemailer.createTransport({
       service: "gmail",
+      port: 587,
+      secure: false,
+
       auth: {
         user: process.env.NodeMail_ID,
         pass: process.env.NodeMailPassword,
@@ -52,27 +56,6 @@ const createuser = async (req, res) => {
 
     res.status(200).json({
       message: "Otp is send to your email plz verify",
-    });
-
-    const payload = {
-      id: user._id,
-      email: user.email,
-    };
-    const accesstoken = jwt.sign(payload, process.env.SECRET_KEY, {
-      expiresIn: "1d",
-    });
-    const refreshtoken = jwt.sign(payload, process.env.SECRET_KEY, {
-      expiresIn: "7d",
-    });
-
-    user.refreshtoken = refreshtoken;
-    await user.save();
-    res.status(201).json({
-      message: "Signup successfully",
-      code: 201,
-      data: user,
-      accesstoken: accesstoken,
-      refreshtoken: refreshtoken,
     });
   } catch (error) {
     res.status(500).json({
@@ -106,9 +89,25 @@ const verifyotp = async (req, res) => {
     user.otpExpiry = null;
     await user.save();
 
-    res.status(200).json({
+    const payload = {
+      id: user._id,
+      email: user.email,
+    };
+    const accesstoken = jwt.sign(payload, process.env.SECRET_KEY, {
+      expiresIn: "1d",
+    });
+    const refreshtoken = jwt.sign(payload, process.env.SECRET_KEY, {
+      expiresIn: "7d",
+    });
+
+    user.refreshtoken = refreshtoken;
+    await user.save();
+    res.status(201).json({
       message: "Signup successfully",
-      code: 200,
+      code: 201,
+      data: user,
+      accesstoken: accesstoken,
+      refreshtoken: refreshtoken,
     });
   } catch (error) {
     res.status(500).json({
