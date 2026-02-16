@@ -287,7 +287,7 @@ const refresht = async (req, res) => {
 
 const deleteuser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findById(req.params.id);
 
     if (!user) {
       return res.status(401).json({
@@ -295,6 +295,10 @@ const deleteuser = async (req, res) => {
         code: 401,
       });
     }
+    if (user.avatar) {
+      fs.unlinkSync(user.avatar);
+    }
+    await User.findByIdAndDelete(req.params.id);
     res.status(200).json({
       message: "user Delete succesfully",
       code: 200,

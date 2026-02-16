@@ -4,9 +4,9 @@ const buyProduct = mongoose.Schema(
   {
     idproduct: { type: mongoose.Schema.Types.ObjectId, ref: "product" },
 
-    name:{
-      type:String,
-      required:true
+    name: {
+      type: String,
+      required: true,
     },
     quantity: {
       type: Number,
@@ -14,10 +14,9 @@ const buyProduct = mongoose.Schema(
     },
     totalprice: {
       type: Number,
-      
     },
   },
   { timestamps: true },
 );
 
-module.exports = mongoose.model("buyproduct",buyProduct)
+module.exports = mongoose.model("buyproduct", buyProduct);
